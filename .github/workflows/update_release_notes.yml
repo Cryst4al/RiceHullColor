@@ -1,0 +1,21 @@
+name: update-release-notes
+
+on:
+  push:
+    branches:
+      - void
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: contains(github.event.head_commit.message, '[update v0.1.0 notes]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update the v0.1.0 release description
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit v0.1.0 --notes-file docs/RELEASE_NOTES_0.1.0.md
+

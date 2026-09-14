@@ -1,113 +1,154 @@
 # RiceHullColor
 
-RiceHullColor 是一个可复现的水稻颖壳颜色表型分析工具。它把经过 Adobe Camera Raw/Photoshop 全局颜色校正的 `CAL.tif` 或仅裁切的 `ROI.tif`，转换为逐粒、逐图像和逐材料的 CIELAB D50、sRGB 与灰度结果，并同时保存 Fiji/ImageJ 可读取的 ROI、质控叠加图和运行清单。
+RiceHullColor is a reproducible image-analysis toolkit for rice hull color phenotyping. It converts globally color-corrected `CAL.tif` images—or cropped, otherwise unmodified `ROI.tif` images—into hull-level, image-level, and material-level CIELAB D50, sRGB, and grayscale measurements. It also produces Fiji/ImageJ-compatible ROI files, quality-control overlays, Excel workbooks, and auditable run manifests.
 
-> 当前版本从 16 位 sRGB TIFF 开始执行定量分析。RAW 的白平衡、镜头校正和 16 位 sRGB 输出仍在 Adobe Camera Raw 中完成；软件不会修改 RAW 感光数据。JPEG 仅允许作演示或试运行，不推荐用于正式分析。
+> The quantitative pipeline starts from a 16-bit sRGB TIFF. RAW white balance, lens correction, and 16-bit sRGB export are performed in Adobe Camera Raw before analysis. RiceHullColor never modifies the original RAW sensor data. JPEG input is supported for demonstration only and is not recommended for formal color analysis.
 
-## 主要特点
+## Key features
 
-- 按实际检测到的颖壳数输出，不强制每张图必须有 10 粒；
-- 与既有实验口径一致：`a* < -5`、`b* > 5`、`15 <= L* <= 90` 的组织掩膜，并测量每个连通域中央 70%；
-- sRGB（D65）先适配到 D50，再计算 CIELAB；平均 Lab 可反算为 sRGB；
-- 灰度默认按 `0.299R + 0.587G + 0.114B`（BT.601）计算；
-- 输出逐粒 CSV、图像/材料汇总、Excel、多页统计结果、ROI.zip、QC 叠加图和 JSON 审计记录；
-- 可通过 YAML 固定阈值、最小面积、最大粒数和中央区域比例；
-- 提供命令行与简易桌面图形界面。
+- Reports the actual number of detected hulls instead of forcing every image to contain exactly ten objects.
+- Preserves the validated settings: a tissue mask of `a* < -5`, `b* > 5`, and `15 <= L* <= 90`, followed by measurement of the central 70% of each connected component.
+- Converts sRGB D65 to CIELAB D50 using Bradford chromatic adaptation.
+- Converts mean CIELAB D50 values back to 8-bit sRGB for reporting.
+- Calculates grayscale using BT.601: `0.299R + 0.587G + 0.114B`.
+- Exports per-hull CSV files, image and material summaries, Excel workbooks, Fiji/ImageJ `ROI.zip` files, QC overlays, and JSON audit manifests.
+- Stores thresholds, minimum component area, maximum object count, and central measurement fraction in a versioned YAML configuration.
+- Provides both a command-line interface and a lightweight Windows desktop interface.
+- Includes material-level association statistics, PCA, PERMANOVA, and repeated cross-validated logistic regression.
 
-## 安装
+## Installation
 
-Windows 用户可在 PowerShell 中进入源码目录并执行：
+### Windows guided installation
+
+Open PowerShell in the source directory and run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\install_windows.ps1
 ```
 
-安装完成后双击 `run_gui.cmd`。也可手动安装：
+After installation, double-click `run_gui.cmd` to open the desktop interface.
+
+### Manual installation
 
 ```bash
 python -m venv .venv
+
 # Windows
 .venv\Scripts\activate
+
+# Linux or macOS
+source .venv/bin/activate
+
 python -m pip install -e .
 ```
 
-Photoshop LZW/ZIP 压缩的 16 位 TIFF 建议安装完整 TIFF 支持：
+For complete 16-bit Photoshop TIFF support, install the TIFF extras:
 
 ```bash
 python -m pip install -e ".[tiff]"
 ```
 
-## 5 分钟快速开始
+## Quick start
+
+Create the standard experiment structure:
 
 ```bash
 ricehullcolor init D:\experiment\HULL
 ```
 
-把颜色校正母版放入 `02_CAL颜色校正图`，或把仅裁切的图像放入 `03_ROI分析图`。文件名推荐为：
+Place color-corrected master images in `02_CAL颜色校正图`, or cropped analysis images in `03_ROI分析图`. The recommended filename format is:
 
 ```text
 DEMO001-R1-P03-HULL-20260813-I01_ROI.tif
 ```
 
-分析单张图像：
+Analyze one image:
 
 ```bash
 ricehullcolor analyze "03_ROI分析图/DEMO001-R1-P03-HULL-20260813-I01_ROI.tif" \
   --project . --config configs/hull_color_global_v1.yml
 ```
 
-批量分析并生成统一 Excel：
+Analyze a project and create a unified Excel workbook:
 
 ```bash
 ricehullcolor batch . --config configs/hull_color_global_v1.yml
 ricehullcolor aggregate . --xlsx results/RiceHullColor_summary.xlsx
 ```
 
-打开图形界面：
+Open the desktop interface:
 
 ```bash
 ricehullcolor-gui
 ```
 
-## 输出
+## Project structure
 
 ```text
 HULL/
-├─ 00_RAW原始备份/
-├─ 01_RAW工作副本/
-├─ 02_CAL颜色校正图/
-├─ 03_ROI分析图/
-├─ 04_QC预览图/              # ROI轮廓、编号与检测数量
-├─ 05_ROI选区/                # Fiji/ImageJ ROI.zip
-├─ 06_LAB数据/                # 逐图CSV、总表、运行清单
-└─ results/                   # Excel与统计结果
+├─ 00_RAW原始备份/          # untouched RAW backup
+├─ 01_RAW工作副本/          # RAW working copies and XMP sidecars
+├─ 02_CAL颜色校正图/         # 16-bit sRGB color-corrected master TIFFs
+├─ 03_ROI分析图/             # cropped analysis TIFFs
+├─ 04_QC预览图/              # numbered ROI overlays
+├─ 05_ROI选区/               # Fiji/ImageJ ROI.zip files
+├─ 06_LAB数据/               # CSV measurements and audit manifests
+└─ results/                  # Excel workbooks and statistical outputs
 ```
 
-逐粒结果保留 `PixelCount`、L*/a*/b* 的均值/中位数/标准差、反算 RGB、灰度、源文件与方法。材料汇总以图像为技术重复：先形成图像均值，再对同一材料的图像均值等权平均；同时保留像素加权字段供追溯。
+Per-hull output includes pixel count; mean, median, and standard deviation of L*, a*, and b*; converted RGB; grayscale; source filename; color space; and measurement method.
 
-## 统计分析
+Image summaries are pixel-weighted across valid hull ROIs. Material summaries first calculate an image mean and then average image means with equal weight, preventing images with larger masks from dominating the material phenotype.
 
-准备一个含 `Material`、`Date`、`Group` 和 `Lstar/astar/bstar/Gray` 的材料级 CSV，其中 `Group` 为 `Indica`/`Japonica`：
+## Association analysis
+
+Prepare a material-level CSV containing `Material`, `Date`, `Group`, `Lstar`, `astar`, `bstar`, and optionally `Gray`. `Group` should contain `Indica` and `Japonica`:
 
 ```bash
 ricehullcolor stats data.csv --out results/statistics
 ```
 
-软件输出：日期校正线性模型、BH-FDR、Hedges' g、PERMANOVA 偏 R²、PCA、L2 正则化 Logistic 回归重复分层交叉验证、AUC/平衡准确率/灵敏度/特异度，以及白底出版级 PNG/PDF。统计单位必须是材料；同一材料的多粒、多图像只能作为技术亚样本，不能直接扩增统计样本量。
+The statistical workflow reports:
 
-## 科学边界
+- date-adjusted linear models;
+- Benjamini–Hochberg false-discovery-rate correction;
+- Hedges' g standardized effect sizes;
+- date-restricted PERMANOVA with partial R²;
+- PCA scores and publication-ready plots;
+- repeated stratified cross-validation of L2-regularized logistic regression;
+- AUC, balanced accuracy, sensitivity, and specificity.
 
-- 本软件量化的是在固定成像和全局颜色校正条件下的表型关联；它不能单独证明遗传因果关系。
-- 灰度与 L* 都主要描述明暗，通常高度相关，不应当作两个独立证据重复解释。
-- 不同日期合并时应保留 `Date` 并做批次校正或敏感性分析；若材料与日期完全混杂，则不能区分材料效应和日期效应。
-- 自动 ROI 必须查看 QC 图。粘连、强反光、阴影、病斑或背景异常时，应在 Fiji/ImageJ 中人工修正 ROI 后再提取。
+The material is the statistical unit. Multiple hulls and images from the same material are technical subsamples and must not be treated as independent biological samples.
 
-完整的 Camera Raw 操作规范见 [docs/PHOTOSHOP_ACR_ZH.md](docs/PHOTOSHOP_ACR_ZH.md)，算法与统计口径见 [docs/METHODS_ZH.md](docs/METHODS_ZH.md)。
+## Scientific interpretation
 
-## 数据隐私
+- RiceHullColor quantifies phenotypic associations under controlled imaging and global color correction; it does not establish genetic causality.
+- Grayscale and L* both primarily measure lightness and are usually highly correlated. They should not be interpreted as independent evidence.
+- When dates are combined, retain the imaging date and adjust for batch effects or run sensitivity analyses.
+- If material identity and imaging date are completely confounded, material effects cannot be separated from date effects.
+- Every automated segmentation result must be checked using the QC overlay. Merged hulls, strong reflections, shadows, disease lesions, or abnormal backgrounds require manual review in Fiji/ImageJ.
 
-仓库的 `.gitignore` 默认排除 RAW、XMP、各阶段图像和生成结果。发布前请再次检查 `git status`，不要上传含材料标签、个人信息或未公开试验数据的照片。
+## Documentation
 
-## 引用与许可
+- [Algorithm and statistical methods—Chinese](docs/METHODS_ZH.md)
+- [Adobe Camera Raw and Photoshop protocol—Chinese](docs/PHOTOSHOP_ACR_ZH.md)
+- [Release notes](docs/RELEASE_NOTES_0.1.0.md)
 
-代码使用 Apache-2.0 许可。当前公开作者标识为 GitHub 用户名 `Cryst4al`；如需正式论文署名，请在 `CITATION.cff` 中补充真实姓名和 ORCID。可通过 GitHub Release + Zenodo 归档获得可引用 DOI。
+## Data privacy
+
+The repository `.gitignore` excludes RAW files, XMP sidecars, experiment-stage image folders, and generated results. Do not commit photographs containing labels, personal information, or unpublished experimental data.
+
+The repository and release package contain synthetic schema examples only. No experimental photographs, real material identifiers, or unpublished measurements are included.
+
+## Validation
+
+- Six automated tests cover color conversion, grayscale calculation, actual-count segmentation, ImageJ ROI export, Excel aggregation, and statistical output.
+- GitHub Actions validates the package on Python 3.10, 3.11, and 3.12.
+- An anonymized regression check on a historical 16-bit TIFF reproduced the ROI count, pixel counts, and CIELAB summary statistics from the original workflow.
+
+## Citation and license
+
+RiceHullColor is released under the Apache License 2.0. The current public author identifier is the GitHub account `Cryst4al`. A full author name and ORCID can be added to `CITATION.cff` for formal academic citation.
+
+For a persistent scholarly DOI, connect the GitHub repository to Zenodo before publishing a future release.
+
