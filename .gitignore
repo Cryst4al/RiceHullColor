@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.validation/
+.build_tools/
+.wheel_test/
+venv/
+build/
+dist/
+*.log
+Thumbs.db
+.DS_Store
+
+# Experimental data and generated outputs are deliberately excluded.
+00_RAW*/
+01_RAW*/
+02_CAL*/
+03_ROI*/
+04_QC*/
+05_ROI*/
+06_LAB*/
+results/
+*.ARW
+*.xmp

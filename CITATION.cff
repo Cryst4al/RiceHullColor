@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use RiceHullColor, please cite this software and the archived release DOI."
+title: "RiceHullColor: reproducible color phenotyping for rice hull images"
+type: software
+authors:
+  - name: "Cryst4al"
+version: 0.1.0
+date-released: 2026-09-14
+license: Apache-2.0
+repository-code: "https://github.com/Cryst4al/RiceHullColor"
+abstract: >-
+  A transparent workflow for extracting CIELAB D50, converted sRGB and
+  BT.601 grayscale phenotypes from color-corrected rice hull images.
+keywords:
+  - rice
+  - hull color
+  - CIELAB
+  - phenotyping

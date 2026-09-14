@@ -1,0 +1,21 @@
+profile_name: HULL_COLOR_GLOBAL_V1
+color_space: sRGB IEC61966-2.1
+lab_white_point: D50
+gray_formula: BT.601
+segmentation:
+  a_max: -5.0
+  b_min: 5.0
+  l_min: 15.0
+  l_max: 90.0
+  downsample: 2
+  dilate_iterations: 2
+  min_component_pixels: 24
+  relative_min_area: 0.10
+  max_components: 10
+  central_fraction: 0.70
+  expected_count: null
+qc:
+  jpeg_quality: 95
+  max_preview_pixels: 3000
+  warn_if_8bit: true
+  warn_if_jpeg: true

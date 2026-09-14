@@ -1,0 +1,12 @@
+include README.md LICENSE CITATION.cff CHANGELOG.md CONTRIBUTING.md SECURITY.md run_gui.cmd
+recursive-include configs *.yml
+recursive-include docs *.md
+recursive-include examples *.md *.csv
+recursive-include r_scripts *.R
+recursive-include scripts *.ps1
+recursive-include src/ricehullcolor/resources *.yml
+recursive-include tests *.py
+recursive-exclude .validation *
+recursive-exclude .github *
+global-exclude __pycache__ *.py[cod] *.ARW *.xmp *.tif *.tiff *.jpg *.jpeg *.xlsx
+

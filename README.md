@@ -111,4 +111,3 @@ ricehullcolor stats data.csv --out results/statistics
 ## 引用与许可
 
 代码使用 Apache-2.0 许可。当前公开作者标识为 GitHub 用户名 `Cryst4al`；如需正式论文署名，请在 `CITATION.cff` 中补充真实姓名和 ORCID。可通过 GitHub Release + Zenodo 归档获得可引用 DOI。
-
