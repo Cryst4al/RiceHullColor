@@ -182,7 +182,7 @@ def _stars(q: float) -> str:
 
 
 def _plots(data: pd.DataFrame, univariate: pd.DataFrame, cv_detail: pd.DataFrame, out: Path) -> None:
-    plt.rcParams.update({"font.family": "Arial", "font.size": 8, "axes.linewidth": 0.7, "figure.facecolor": "white"})
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 8, "axes.linewidth": 0.7, "figure.facecolor": "white"})
     colors = {"Indica": "#D55E00", "Japonica": "#0072B2"}
     traits = univariate["Trait"].tolist()
     fig, axes = plt.subplots(1, len(traits), figsize=(7.2, 2.8), constrained_layout=True)
@@ -297,9 +297,9 @@ def run_statistics(
     cv_detail.to_csv(out / "classification_predictions.csv", index=False, encoding="utf-8-sig")
     _plots(data, univariate, cv_detail, out)
     with pd.ExcelWriter(out / "RiceHullColor_statistics.xlsx", engine="openpyxl") as writer:
-        univariate.to_excel(writer, "单变量日期校正", index=False)
-        multivariate.to_excel(writer, "PERMANOVA", index=False)
-        cv_summary.to_excel(writer, "分类性能", index=False)
-        cv_detail.to_excel(writer, "交叉验证预测", index=False)
-        data.to_excel(writer, "分析数据", index=False)
+        univariate.to_excel(writer, sheet_name="单变量日期校正", index=False)
+        multivariate.to_excel(writer, sheet_name="PERMANOVA", index=False)
+        cv_summary.to_excel(writer, sheet_name="分类性能", index=False)
+        cv_detail.to_excel(writer, sheet_name="交叉验证预测", index=False)
+        data.to_excel(writer, sheet_name="分析数据", index=False)
     return {"output_dir": out, "rows": len(data), "indica": int((data.Group == "Indica").sum()), "japonica": int((data.Group == "Japonica").sum())}

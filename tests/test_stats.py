@@ -19,10 +19,10 @@ class StatisticsTests(unittest.TestCase):
                     "Material": f"M{index + 1:02d}",
                     "Date": "20260813" if index % 2 == 0 else "20260816",
                     "Group": "Japonica" if japonica else "Indica",
-                    "Lstar": 52 if japonica else 58 + rng.normal(0, 0.6),
-                    "astar": -11.5 if japonica else -10 + rng.normal(0, 0.2),
-                    "bstar": 35.5 if japonica else 36.7 + rng.normal(0, 0.3),
-                    "Gray": 120 if japonica else 134 + rng.normal(0, 1),
+                    "Lstar": (52 if japonica else 58) + rng.normal(0, 0.6),
+                    "astar": (-11.5 if japonica else -10) + rng.normal(0, 0.2),
+                    "bstar": (35.5 if japonica else 36.7) + rng.normal(0, 0.3),
+                    "Gray": (120 if japonica else 134) + rng.normal(0, 1),
                 }
             )
         with tempfile.TemporaryDirectory() as temporary:
@@ -39,4 +39,3 @@ class StatisticsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
