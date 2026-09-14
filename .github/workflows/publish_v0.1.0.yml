@@ -1,0 +1,33 @@
+name: publish-v0.1.0
+
+on:
+  push:
+    branches:
+      - void
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: contains(github.event.head_commit.message, '[release v0.1.0]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip build
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -v
+      - run: python -m build
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create v0.1.0
+          dist/*.whl dist/*.tar.gz
+          --target "$GITHUB_SHA"
+          --title "RiceHullColor v0.1.0"
+          --notes-file docs/RELEASE_NOTES_0.1.0.md
+
